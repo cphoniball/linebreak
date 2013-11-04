@@ -17,7 +17,7 @@ var linebreak = (function() {
 	$.fn.extend({
 		privateWrapWords: function() {
 			$(this).html($(this).text().split(' ').map(function(item) {
-				return item = '<span class="' + settings.wordWrap + '">' + item + ' </span>';
+				return '<span class="' + settings.wordWrap + '">' + item + ' </span>';
 			}).join(' '));
 			return $(this);
 		},
@@ -35,7 +35,7 @@ var linebreak = (function() {
 			function delayed() {
 				func.apply(obj, args);
 				timeout = null;
-			};
+			}
 
 			if (timeout) clearTimeout(timeout);
 			timeout = setTimeout(delayed, threshold || 100);
@@ -55,14 +55,6 @@ var linebreak = (function() {
 		}
 	}
 
-	function privateSaveContents() {
-		return settings.$target.text();
-	}
-
-	function privateResetContents() {
-		settings.$target.html(settings.contents);
-	}
-
 	function publicWrapLineBreaks() {
 		settings.$target.each(function() {
 			$(this).privateWrapWords(settings.wordWrap);
@@ -72,12 +64,10 @@ var linebreak = (function() {
 		return this;
 	}
 
-
-
 	function publicWatch() {
 		$(window).smartresize(function() {
 			console.log('resize event firing');
-			privateResetContents();
+			settings.$target.html(settings.contents);
 			publicWrapLineBreaks();
 		}, 500);
 		return this;
@@ -85,11 +75,8 @@ var linebreak = (function() {
 
 	function publicInit(options) {
 		$.extend(settings, options);
-		// save initial content for resize
-		settings.contents = privateSaveContents();
-
+		settings.contents = settings.$target.text();
 		publicWrapLineBreaks();
-
 		console.log(settings);
 		return this;
 	}
@@ -101,14 +88,3 @@ var linebreak = (function() {
 	};
 
 })();
-
-$(document).ready(function() {
-
-	var myLinebreak = linebreak.init({
-		$target: $('[data-linebreak="true"]'),
-		wordWrap: 'lb-word-wrap',
-		lineWrap: 'highlight'
-	}).watch();
-
-
-});
