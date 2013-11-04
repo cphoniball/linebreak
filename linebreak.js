@@ -4,7 +4,14 @@
  * Dependencies: jQuery
  */
 
-var linebreak = function() {
+var Linebreak = function(options) {
+
+	this.$target = options.$target || $('[data-linebreak="true"]');
+	this.wordWrap = options.wordWrap || 'lb-word-wrap';
+	this.lineWrap = options.lineWrap || 'lb-line-wrap';
+	this.callback = options.callback || false;
+	this.watch = options.watch || false;
+	this.originalText = $target.text();
 
 	$.fn.extend({
 		privateWrapWords: function(wordWrap) {
@@ -15,7 +22,7 @@ var linebreak = function() {
 		}
 	});
 
-	function privateWrapLines(wordWrap, lineWrap) {
+	function privateWrapLines() {
 		var lines = {}, offset = 0, counter = 0;
 		$('.' + wordWrap).each(function() {
 			offset =  $(this).offset().top;
@@ -23,24 +30,51 @@ var linebreak = function() {
 		});
 		while ($('.' + wordWrap).length) {
 			offset = $('.' + wordWrap).first().data('offset');
-			$('.' + wordWrap + '[data-offset=' + offset + ']').removeClass(wordWrap).wrapAll('<span class="' + lineWrap + '" data-linenum="' + counter + '"></span>');
-			counter++;
+			// wrap line in span and add data attributes
+			$('.' + wordWrap + '[data-offset=' + offset + ']')
+				.removeClass(wordWrap)
+				.wrapAll('<span class="' + lineWrap + '" data-linenum="' + counter + '" data-offset="' + offset + '"></span>');
+				counter++;
+		}
+		// remove inner
+	}
+
+	function privateWatch() {
+		var hasResized = false;
+
+		$(window).resize(function() {
+			hasResized = true;
+		});
+
+		setInterval(function() {
+			if (hasResized) {
+				hasResized = false;
+				console.log('Resize functions fired.');
+				privateReplaceWithOriginal();
+				publicWrapLineBreaks();
+			}
+		}, 1000);
+	}
+
+	function privateReplaceWithOriginal() {
+		$target.contents().remove();
+		$target.text(originalText);
+	}
+
+	function publicWrapLineBreaks() {
+		$target.privateWrapWords(wordWrap);
+		privateWrapLines(wordWrap, lineWrap);
+		if (callback) { callback(); }
+	}
+
+	function publicInit() {
+		publicWrapLineBreaks();
+
+		if (watch) {
+			privateWatch();
 		}
 	}
 
-	function publicWrapLineBreaks(options) {
-		var $target = options.$target || $('[data-linebreak="true"]'),
-			wordWrap = options.wordWrap || 'lb-word-wrap',
-			lineWrap = options.lineWrap || 'lb-line-wrap',
-			callback = options.callback || false;
-
-		$target.each(function() {
-			$(this).privateWrapWords(wordWrap);
-		});
-		privateWrapLines(wordWrap, lineWrap);
-
-		if (callback) { callback(); }
-	}
 
 	return {
 		wrapLines: publicWrapLineBreaks
@@ -50,10 +84,11 @@ var linebreak = function() {
 
 $(document).ready(function() {
 
-	linebreak.wrapLines({
+	var linebreak = new Linebreak({
 		$target: $('[data-linebreak="true"]'),
 		wordWrap: 'lb-word-wrap',
-		lineWrap: 'highlight'
+		lineWrap: 'highlight',
+		watch: true
 	});
 
 
