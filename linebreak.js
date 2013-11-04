@@ -6,55 +6,88 @@
 
 var linebreak = function() {
 
+	var settings = {
+		$target: $('[data-linebreak="true"]'),
+		wordWrap: 'lb-word-wrap',
+		lineWrap: 'lb-line-wrap',
+		callback: false
+	};
+
 	$.fn.extend({
-		privateWrapWords: function(wordWrap) {
+		privateWrapWords: function() {
 			$(this).html($(this).text().split(' ').map(function(item) {
-				return item = '<span class="' + wordWrap + '">' + item + ' </span>';
+				return item = '<span class="' + settings.wordWrap + '">' + item + ' </span>';
 			}).join(' '));
 			return $(this);
 		}
 	});
 
-	function privateWrapLines(wordWrap, lineWrap) {
+	function privateWrapLines() {
 		var lines = {}, offset = 0, counter = 0;
-		$('.' + wordWrap).each(function() {
+		$('.' + settings.wordWrap).each(function() {
 			offset =  $(this).offset().top;
 			$(this).attr('data-offset', Math.round(offset));
 		});
-		while ($('.' + wordWrap).length) {
-			offset = $('.' + wordWrap).first().data('offset');
-			$('.' + wordWrap + '[data-offset=' + offset + ']').removeClass(wordWrap).wrapAll('<span class="' + lineWrap + '" data-linenum="' + counter + '"></span>');
+		while ($('.' + settings.wordWrap).length) {
+			offset = $('.' + settings.wordWrap).first().data('offset');
+			$('.' + settings.wordWrap + '[data-offset=' + offset + ']').removeClass(settings.wordWrap).wrapAll('<span class="' + settings.lineWrap + '" data-linenum="' + counter + '"></span>');
 			counter++;
 		}
 	}
 
-	function publicWrapLineBreaks(options) {
-		var $target = options.$target || $('[data-linebreak="true"]'),
-			wordWrap = options.wordWrap || 'lb-word-wrap',
-			lineWrap = options.lineWrap || 'lb-line-wrap',
-			callback = options.callback || false;
+	function privateSaveContents() {
+		//return settings.$target.html();
+	}
 
-		$target.each(function() {
-			$(this).privateWrapWords(wordWrap);
+	function publicWrapLineBreaks() {
+		privateSaveContents(settings.$target);
+
+		settings.$target.each(function() {
+			$(this).privateWrapWords(settings.wordWrap);
 		});
-		privateWrapLines(wordWrap, lineWrap);
+		privateWrapLines();
 
-		if (callback) { callback(); }
+		if (settings.callback) { settings.callback(); }
+
+		return this;
+	}
+
+	function publicWatch() {
+		$(window).resize(function() {
+			publicWrapLineBreaks();
+		});
+	}
+
+	function publicInit(options) {
+		$.extend(settings, options);
+
+		console.log(settings);
+
+		// save initial content for resize
+		//settings.contents = privateSaveContents();
+		return this;
+	}
+
+	function getSettings() {
+		return settings;
 	}
 
 	return {
-		wrapLines: publicWrapLineBreaks
+		init: publicInit,
+		wrapLines: publicWrapLineBreaks,
+		watch: publicWatch,
+		getSettings: getSettings
 	};
 
 }();
 
 $(document).ready(function() {
 
-	linebreak.wrapLines({
+	var myLinebreak = linebreak.init({
 		$target: $('[data-linebreak="true"]'),
 		wordWrap: 'lb-word-wrap',
 		lineWrap: 'highlight'
-	});
+	}).wrapLines();
 
 
 });
