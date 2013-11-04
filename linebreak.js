@@ -4,7 +4,7 @@
  * Dependencies: jQuery
  */
 
-var linebreak = function() {
+var linebreak = (function() {
 
 	var settings = {
 		$target: $('[data-linebreak="true"]'),
@@ -20,8 +20,27 @@ var linebreak = function() {
 				return item = '<span class="' + settings.wordWrap + '">' + item + ' </span>';
 			}).join(' '));
 			return $(this);
+		},
+		smartresize: function(func, threshold) {
+			return func ? this.bind('resize', privateDebounce(func, threshold)) : this.trigger(smartresize);
 		}
 	});
+
+	// debouncing function from John Hann
+	// http://unscriptable.com/index.php/2009/03/20/debouncing-javascript-methods/
+	function privateDebounce(func, threshold) {
+		var timeout;
+		return function debounced() {
+			var obj = this, args = arguments;
+			function delayed() {
+				func.apply(obj, args);
+				timeout = null;
+			};
+
+			if (timeout) clearTimeout(timeout);
+			timeout = setTimeout(delayed, threshold || 100);
+		};
+	}
 
 	function privateWrapLines() {
 		var lines = {}, offset = 0, counter = 0;
@@ -53,34 +72,14 @@ var linebreak = function() {
 		return this;
 	}
 
-	(function($,sr){
 
-	  // debouncing function from John Hann
-	  // http://unscriptable.com/index.php/2009/03/20/debouncing-javascript-methods/
-	  var debounce = function (func, threshold, execAsap) {
-	      var timeout;
-	      return function debounced () {
-	          var obj = this, args = arguments;
-	          function delayed () {
-	              if (!execAsap) func.apply(obj, args);
-	              timeout = null;
-	          };
-
-	          if (timeout) clearTimeout(timeout);
-	          timeout = setTimeout(delayed, threshold || 100);
-	      };
-	  }
-	    // smartresize
-	    jQuery.fn[sr] = function(fn){  return fn ? this.bind('resize', debounce(fn, 500)) : this.trigger(sr); };
-
-	})(jQuery,'smartresize');
 
 	function publicWatch() {
 		$(window).smartresize(function() {
 			console.log('resize event firing');
 			privateResetContents();
 			publicWrapLineBreaks();
-		});
+		}, 500);
 		return this;
 	}
 
@@ -101,7 +100,7 @@ var linebreak = function() {
 		watch: publicWatch
 	};
 
-}();
+})();
 
 $(document).ready(function() {
 
