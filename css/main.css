@@ -4,7 +4,7 @@
   left: 10%;
   width: 80%;
   overflow: none;
-  font-size: 50px;
+  font-size: 40px;
   padding: 20px;
   line-height: 1.5; }
 
@@ -18,7 +18,10 @@
   .hero-img img {
     width: 100%; }
 
+h2[data-linebreak="true"] {
+  max-width: 80%; }
+
 .highlight {
   background-color: #61cfff;
-  padding: 5px 10px;
-  margin-bottom: 10px; }
+  padding: 10px 15px;
+  line-height: 1.7; }
