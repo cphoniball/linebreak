@@ -10,7 +10,8 @@ var linebreak = function() {
 		$target: $('[data-linebreak="true"]'),
 		wordWrap: 'lb-word-wrap',
 		lineWrap: 'lb-line-wrap',
-		callback: false
+		callback: false,
+		contents: ''
 	};
 
 	$.fn.extend({
@@ -36,47 +37,68 @@ var linebreak = function() {
 	}
 
 	function privateSaveContents() {
-		//return settings.$target.html();
+		return settings.$target.text();
+	}
+
+	function privateResetContents() {
+		settings.$target.html(settings.contents);
 	}
 
 	function publicWrapLineBreaks() {
-		privateSaveContents(settings.$target);
-
 		settings.$target.each(function() {
 			$(this).privateWrapWords(settings.wordWrap);
 		});
 		privateWrapLines();
-
-		if (settings.callback) { settings.callback(); }
-
+		if (settings.callback) settings.callback();
 		return this;
 	}
 
+	(function($,sr){
+
+	  // debouncing function from John Hann
+	  // http://unscriptable.com/index.php/2009/03/20/debouncing-javascript-methods/
+	  var debounce = function (func, threshold, execAsap) {
+	      var timeout;
+	      return function debounced () {
+	          var obj = this, args = arguments;
+	          function delayed () {
+	              if (!execAsap) func.apply(obj, args);
+	              timeout = null;
+	          };
+
+	          if (timeout) clearTimeout(timeout);
+	          timeout = setTimeout(delayed, threshold || 100);
+	      };
+	  }
+	    // smartresize
+	    jQuery.fn[sr] = function(fn){  return fn ? this.bind('resize', debounce(fn, 500)) : this.trigger(sr); };
+
+	})(jQuery,'smartresize');
+
 	function publicWatch() {
-		$(window).resize(function() {
+		$(window).smartresize(function() {
+			console.log('resize event firing');
+			privateResetContents();
 			publicWrapLineBreaks();
 		});
+		return this;
 	}
 
 	function publicInit(options) {
 		$.extend(settings, options);
+		// save initial content for resize
+		settings.contents = privateSaveContents();
+
+		publicWrapLineBreaks();
 
 		console.log(settings);
-
-		// save initial content for resize
-		//settings.contents = privateSaveContents();
 		return this;
-	}
-
-	function getSettings() {
-		return settings;
 	}
 
 	return {
 		init: publicInit,
 		wrapLines: publicWrapLineBreaks,
-		watch: publicWatch,
-		getSettings: getSettings
+		watch: publicWatch
 	};
 
 }();
@@ -87,7 +109,7 @@ $(document).ready(function() {
 		$target: $('[data-linebreak="true"]'),
 		wordWrap: 'lb-word-wrap',
 		lineWrap: 'highlight'
-	}).wrapLines();
+	}).watch();
 
 
 });
