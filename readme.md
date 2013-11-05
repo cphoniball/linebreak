@@ -4,7 +4,7 @@ A small jQuery plugin that wraps your text in spans. This allows styling not ach
 
 ###Demo
 
-(Demo here)[http://honiballweb.com/linebreak]
+[Demo here](http://honiballweb.com/linebreak)
 
 ###Usage
 
