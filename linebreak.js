@@ -55,7 +55,6 @@ var linebreak = (function() {
 			$('.' + settings.wordWrap + '[data-offset=' + offset + ']').removeClass(settings.wordWrap).wrapAll('<span class="' + settings.lineWrap + '" data-linenum="' + counter + '"></span>');
 			counter++;
 		}
-		// remove inner
 	}
 
 	function publicWrapLineBreaks() {
