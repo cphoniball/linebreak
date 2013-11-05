@@ -16,12 +16,18 @@ Here's some text that I'm going to run linebreak.js on
 
 Then, in your javascript file, initiate the plugin:
 
-<pre><code class="language-javascript">var myLB = linebreak.init({
-	$target: $('[data-linebreak="true"]'),
-	wordWrap: 'lb-word-wrap',
-	lineWrap: 'lb-line-wrap highlight',
+```javascript
+var myLB = linebreak.init({
+	$target: $('[data-linebreak="true"]'), // text container
+	wordWrap: 'lb-word-wrap', // individual words will be wrapped with this class
+	lineWrap: 'lb-line-wrap', // lines will be wrapped with this class
 	callback: function() {}
-});</code></pre>
+});
+```
+
+Then style away with whichever class you used for `lineWrap`.
+
+__n
 
 If you want linebreak to watch for changes in screen size and adjust appropriately, just grab that variable you initialized and call the `.watch()` method on it.
 
