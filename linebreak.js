@@ -31,7 +31,6 @@ var linebreak = (function() {
 		}
 	});
 
-
 	// debouncing function from John Hann
 	// http://unscriptable.com/index.php/2009/03/20/debouncing-javascript-methods/
 	// Works by repeatedly issuing and clearing setTimeouts when an event is triggered
@@ -71,7 +70,10 @@ var linebreak = (function() {
 		//    4. Wraps all the elements in a span of class settings.lineWrap
 		while ($('.' + settings.wordWrap).length) {
 			offset = $('.' + settings.wordWrap).first().data('offset');
-			$('.' + settings.wordWrap + '[data-offset=' + offset + ']').removeClass(settings.wordWrap).wrapAll('<span class="' + settings.lineWrap + '" data-linenum="' + counter + '"></span>');
+
+			$('.' + settings.wordWrap + '[data-offset=' + offset + ']').removeClass(settings.wordWrap)
+			.wrapAll('<span class="' + settings.lineWrap + '" data-linenum="' + counter + '" + data-offset="' + offset + '"></span>');
+
 			counter++;
 		}
 
@@ -79,6 +81,20 @@ var linebreak = (function() {
 		if (settings.callback) settings.callback();
 
 		return this;
+	}
+
+	// Check that the offsets on words match the offsets on lines
+	function _checkOffsets() {
+		var $lines = $('.' + settings.lineWrap);
+
+		$lines.each(function() {
+			var offset = $(this).data('offset');
+			$(this).children('span').each(function() {
+				if ($(this).data('offset') !== offset) {
+					// what do I do with things that don't match?
+				}
+			});
+		});
 	}
 
 	// Watches for resize using a debounce function
